@@ -1,78 +1,218 @@
-# Digit Recognition using CNN
+# 🎨 Handwritten Digit Recognition with CNN & Streamlit
 
-This project involves building a Convolutional Neural Network (CNN) to recognize handwritten digits using the MNIST dataset. The model is trained and saved, and then used to predict digits drawn by the user in MS Paint.
+An interactive web application for recognizing handwritten digits (0-9) using a Convolutional Neural Network trained on the MNIST dataset. Draw digits directly in your browser and get real-time predictions!
 
-## Table of Contents
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15-orange.svg)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.29-red.svg)
 
-- [Project Description](#project-description)
-- [Setup and Installation](#setup-and-installation)
-- [Usage](#usage)
-- [Model Architecture](#model-architecture)
-- [Known Limitations](#known-limitations)
-- [Future Enhancements](#future-enhancements)
-- [Contributing](#contributing)
-- [Acknowledgments](#acknowledgments)
+## ✨ Features
 
-## Project Description
+- 🎨 **Interactive Drawing Canvas**: Draw digits directly in your browser
+- 🤖 **Real-time Predictions**: Instant digit recognition with confidence scores
+- 📊 **Probability Distribution**: See prediction probabilities for all digits (0-9)
+- 💾 **Save Drawings**: Save your drawings for later use
+- 🎯 **High Accuracy**: CNN model trained on 60,000 MNIST samples
+- 🎨 **Customizable UI**: Adjust brush size, colors, and more
 
-The goal of this project is to create a CNN model that can recognize handwritten digits. The model is trained on the MNIST dataset and then used to predict digits drawn by the user in MS Paint. The user can draw a digit, save the image, and the model will predict the digit.
+## 🚀 Quick Start
 
-## Setup and Installation
+### Prerequisites
 
-1. **Clone the Repository**
+- Python 3.8 or higher
+- pip package manager
 
+### Installation
+
+1. **Clone the repository**
    ```bash
    git clone https://github.com/MuhammadMehdiRaza/Hand_Written_Digit_Recogntition.git
    cd Hand_Written_Digit_Recogntition
    ```
 
-2. **Ensure Python and Related Library Installation**
+2. **Install dependencies**
    ```bash
-   pip install tensorflow matplotlib cv2 python numpy subprocess os
+   pip install -r requirements.txt
    ```
 
-## Usage
+3. **Train the model** (first time only)
+   ```bash
+   python train_model.py
+   ```
+   This will train the CNN model and save it to the `models/` directory. Training takes about 5-10 minutes depending on your hardware.
 
-1. **Open MS Paint**
+4. **Run the Streamlit app**
+   ```bash
+   streamlit run app.py
+   ```
 
-   The script will automatically open MS Paint. Draw a digit and save the image in the **Digits_Folder** directory with the name format **{image_no}.png.**
+5. **Open your browser** at `http://localhost:8501` and start drawing!
 
-2. **Predict the Digit (0-9)**
+## 📁 Project Structure
 
-   After saving the image, the script will predict the digit and display the result along with the image.
+```
+Hand_Written_Digit_Recogntition/
+├── app.py                      # Main Streamlit application
+├── train_model.py              # Model training script
+├── 3.py                        # Original MS Paint-based version
+├── requirements.txt            # Python dependencies
+├── README.md                   # Documentation
+├── models/                     # Saved models directory
+│   ├── digit_recognition_model.keras
+│   └── training_history.png
+└── saved_digits/              # Saved user drawings
+```
 
-3. **Continue or Exit**
+## 🧠 Model Architecture
 
-   The script will ask if you want to continue. If you choose to continue, the process will repeat. If you choose to exit, the script will terminate.
+The CNN model consists of:
 
-## Model Architecture
+- **Conv2D Layer 1**: 64 filters, 3×3 kernel, ReLU activation
+- **Conv2D Layer 2**: 32 filters, 3×3 kernel, ReLU activation
+- **MaxPooling2D**: 2×2 pool size
+- **Dropout**: 25% dropout rate
+- **Flatten Layer**: Converts 2D features to 1D
+- **Dense Layer 1**: 128 neurons, ReLU activation
+- **Dropout**: 50% dropout rate
+- **Dense Layer 2**: 10 neurons (output), Softmax activation
 
-The CNN model consists of the following layers:
+**Performance:**
+- Training Accuracy: ~99%
+- Test Accuracy: ~98%
+- Dataset: MNIST (60,000 training, 10,000 test images)
 
-- Conv2D layer with 64 filters, kernel size 3, and ReLU activation.
+## 🎯 Usage Guide
 
-- Conv2D layer with 32 filters, kernel size 3, and ReLU activation.
+### Drawing Tips for Best Results
 
-- MaxPooling2D layer with pool size (2, 2).
-- Flatten layer.
+1. **Center your digit**: Draw in the middle of the canvas
+2. **Use thick strokes**: Increase brush size for clearer digits
+3. **Make it bold**: The model works best with clear, bold digits
+4. **Fill the space**: Don't make your digit too small
+5. **Try different styles**: The model is trained on various handwriting styles
 
-- Dense layer with 10 units and softmax activation
+### Streamlit App Features
 
-The model is compiled with the Adam optimizer, categorical crossentropy loss, and accuracy metric.
+- **Canvas Settings**: Adjust brush size and colors in the sidebar
+- **Clear Canvas**: Reset the canvas to draw a new digit
+- **Save Drawing**: Save your drawings to the `saved_digits/` folder
+- **Live Preview**: See the 28×28 preprocessed image
+- **Probability Chart**: View confidence scores for all digits
 
-## Known Limitations
+## 🔧 Advanced Usage
 
-- The dataset comprises from 0-9.
+### Retrain the Model
 
-- The script assumes the user saves the image in the correct format and location: **Digits_Folder/{image_no}.png.**
+To retrain with different parameters, edit `train_model.py`:
 
-- Input images must be **GrayScale** and **28x28 pixels** have to be selected when **Paint** gets opened for optimal performance.
+```python
+# Adjust epochs
+hist = model.fit(x_train, y_train_one_hot, epochs=20)  # Increase epochs
 
-## Future Enhancements
+# Modify architecture
+model.add(tf.keras.layers.Conv2D(128, kernel_size=3, activation='relu'))
+```
 
-- Replace MS Paint with an integrated GUI for drawing.
+### Use Your Own Images
 
-- Add preprocessing steps to handle varying input image sizes and formats.
+You can test the model with your own images:
+
+```python
+import tensorflow as tf
+import cv2
+import numpy as np
+
+model = tf.keras.models.load_model("models/digit_recognition_model.keras")
+img = cv2.imread("your_image.png", cv2.IMREAD_GRAYSCALE)
+img = cv2.resize(img, (28, 28))
+img = cv2.bitwise_not(img)  # Invert if needed
+img = img / 255.0
+img = img.reshape(1, 28, 28, 1)
+
+prediction = model.predict(img)
+print(f"Predicted digit: {np.argmax(prediction)}")
+```
+
+## 📦 Dependencies
+
+- **TensorFlow**: Deep learning framework
+- **Streamlit**: Web app framework
+- **streamlit-drawable-canvas**: Canvas widget for Streamlit
+- **OpenCV**: Image processing
+- **NumPy**: Numerical computations
+- **Pillow**: Image handling
+- **Matplotlib**: Plotting and visualization
+
+## 🐛 Troubleshooting
+
+### Model not found error
+```bash
+# Make sure to train the model first
+python train_model.py
+```
+
+### Canvas not displaying
+```bash
+# Reinstall streamlit-drawable-canvas
+pip install --upgrade streamlit-drawable-canvas
+```
+
+### TensorFlow issues
+```bash
+# For Apple Silicon (M1/M2)
+pip install tensorflow-macos
+
+# For GPU support
+pip install tensorflow-gpu
+```
+
+## 🎓 How It Works
+
+1. **Data Loading**: Loads 70,000 MNIST images (28×28 grayscale)
+2. **Preprocessing**: Normalizes pixel values and one-hot encodes labels
+3. **Training**: Trains CNN for 10 epochs with Adam optimizer
+4. **Prediction**: Converts canvas drawing to 28×28, preprocesses, and predicts
+5. **Visualization**: Displays prediction with confidence scores
+
+## 🚀 Future Enhancements
+
+- [ ] Support for multi-digit recognition
+- [ ] Model comparison (different architectures)
+- [ ] Export predictions to CSV
+- [ ] Mobile-responsive design
+- [ ] Dark/Light theme toggle
+- [ ] Batch prediction from uploaded images
+- [ ] Real-time training visualization
+- [ ] Support for custom datasets
+
+## 📝 License
+
+This project is open source and available for educational purposes.
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 🙏 Acknowledgments
+
+- **MNIST Dataset**: Yann LeCun, Corinna Cortes, and Christopher Burges
+- **TensorFlow/Keras**: Google Brain Team
+- **Streamlit**: Streamlit Team
+- Original project by [Muhammad Mehdi Raza](https://github.com/MuhammadMehdiRaza)
+
+## 📧 Contact
+
+For questions or suggestions, please open an issue on GitHub.
+
+---
+
+Made with ❤️ using Python, TensorFlow, and Streamlit
 
 - Extend the system for multiclass classification of custom datasets.
 
